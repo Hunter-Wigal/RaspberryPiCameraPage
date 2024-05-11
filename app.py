@@ -8,18 +8,13 @@ os.environ.setdefault("FLASK_DEBUG", "1")
  
 app = Flask(__name__)
 
-class Camera:
-    camera = None
-    
-    def __init__():
-        camera = Picamera2()
-        camera.configure(camera.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
-        camera.start()    
-    
 
-    def generate_frames(self):
+def generate_frames():
+    with Picamera2() as camera:
+        camera.configure(camera.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
+        camera.start()
         while True:
-            frame = self.camera.capture_array()
+            frame = camera.capture_array()
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
@@ -28,7 +23,7 @@ class Camera:
         
 @app.route('/video_feed')
 def video_feed():
-    return Response(cam.generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
  
 @app.route('/')
@@ -46,10 +41,8 @@ def test_post():
     return "Hello"
  
 
-if __name__ == '__main__':
-    print("Running application")
+#if __name__ == '__main__':
+print("Running application")
     
-    global cam
-    cam = Camera()
 
-    app.run(debug=True, host= '192.168.0.251', port=7000)
+app.run(debug=True, host= '192.168.0.251', port=7000)
