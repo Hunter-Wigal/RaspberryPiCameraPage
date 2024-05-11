@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # Set up camera
 picam2 = picamera2.Picamera2()
-config = picam2.create_video_configuration(...)
+config = picam2.create_video_configuration()
 picam2.configure(config)
 picam2.start_preview()
 
