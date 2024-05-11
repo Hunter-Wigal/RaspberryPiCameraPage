@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <h2>Live Streaming</h2>
-        <img class="stream"> <!-- src="{{ url_for('video_feed') }}"> -->
+        <img src="data:image/jpeg;base64,{{ img.tobytes() | b64encode | safe }}" />
         <div class="controls">
             <h3>Video Controls</h3>
             <button></button>
