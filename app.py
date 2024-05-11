@@ -8,10 +8,11 @@ os.environ.setdefault("FLASK_DEBUG", "1")
  
 app = Flask(__name__)
 
-camera = Picamera2()
-camera.configure(camera.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
-camera.start()
+
 def generate_frames():
+    camera = Picamera2()
+    camera.configure(camera.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
+    camera.start()
     while True:
         frame = camera.capture_array()
         ret, buffer = cv2.imencode('.jpg', frame)
