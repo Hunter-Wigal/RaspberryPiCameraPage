@@ -1,5 +1,5 @@
 from flask import Flask, render_template, Response, url_for, request
-import picamera2
+from picamera2 import Picamera2
 import time
 import cv2
 import os
@@ -8,11 +8,20 @@ os.environ.setdefault("FLASK_DEBUG", "1")
  
 app = Flask(__name__)
 
-# Set up camera
-picam2 = picamera2.Picamera2()
-config = picam2.create_video_configuration()
-picam2.configure(config)
-picam2.start_preview()
+camera = Picamera2()
+camera.configure(camera.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
+camera.start()
+def generate_frames():
+    while True:
+        frame = camera.capture_array()
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
  
 @app.route('/')
@@ -20,12 +29,6 @@ def hello_world():
     if request.method == "POST":
         height = request.form['height']
         
-    if request.method == "GET":
-        stream = io.BytesIO()
-        picam2.capture(stream, 'jpeg', use_video_port=True)
-        stream.seek(0)
-        img = Image.open(stream)
-        return render_template("index.html", img=img)
         
     return render_template("index.html")
 
