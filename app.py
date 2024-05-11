@@ -7,18 +7,25 @@ import os
 os.environ.setdefault("FLASK_DEBUG", "1")
  
 app = Flask(__name__)
+camera = None
 
+def start_camera():
+    global camera
+    camera = Picamera2()
+    camera.configure(camera.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
+    camera.start()
+    time.sleep(5)
 
 def generate_frames():
-    with Picamera2() as camera:
-        camera.configure(camera.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
-        camera.start()
-        while True:
-            frame = camera.capture_array()
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    if camera is None:
+        start_camera()
+
+    while True:
+        frame = camera.capture_array()
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+            b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         
         
 @app.route('/video_feed')
