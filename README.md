@@ -1,0 +1,2 @@
+# Camera Page
+This repository contains code to run a Flask application that shows a live feed of a camera connected to a Raspberry Pi. It was originally started to fix errors I was having with connecting a Pi camera to Octoprint, but ended up no longer being needed. Unfortunately that means it is no longer being maintained/finished, but it could prove useful in the future so it hasn't been removed yet.
